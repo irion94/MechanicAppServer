@@ -34,7 +34,7 @@ module.exports.create = async function (req, res, next) {
             nrDomuWlascicielaPojazdu: undefined,
             nrMieszkaniaWlascicielaPojazdu: undefined,
 
-            userId: req.body.userId,
+            userId: req.session.userId,
             ctreated_at: Date.now(),
             updated_at: Date.now(),
 
