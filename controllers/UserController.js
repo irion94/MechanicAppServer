@@ -1,6 +1,6 @@
 const User = require('../models/user');
 
-module.exports.create = function(req, res, next){
+module.exports.create = async function(req, res, next){
     if (req.body.password !== req.body.passwordConf) {
         let err = new Error('Passwords do not match.');
         err.status = 400;
@@ -13,21 +13,23 @@ module.exports.create = function(req, res, next){
         req.body.password &&
         req.body.passwordConf) {
 
-        const userData = {
+        const userData = new User({
             email: req.body.email,
             username: req.body.username,
             password: req.body.password,
-        };
-
-        User.insertOne(userData, function (error, data) {
-            if (error) {
-                return next(error);
-            } else {
-                req.session.userId = data._id;
-                //return res.json(userData)
-            }
         });
+        console.log(userData)
 
+        await userData.save()
+            .then( result => {
+                console.log('res',result)
+                if (result) {
+                    req.session.userId = result._id;
+                    return res.json(result)
+                } else {
+                    return next(new Error('Insert Error'));
+                }
+            });
     } else {
         let err = new Error('All fields required.');
         err.status = 400;
@@ -39,6 +41,7 @@ module.exports.login = function (req, res, next) {
     console.log(req.query.email , req.query.password)
     if (req.query.email && req.query.password) {
         User.authenticate(req.query.email, req.query.password, function (error, user) {
+            console.log("login", req.query)
             if (error || !user) {
                 let err = new Error('Wrong email or password.');
                 err.status = 401;

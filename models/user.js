@@ -20,8 +20,7 @@ exports.UserSchema = UserSchema = new Schema(
             type: String,
             required: true,
         },
-        vehicleIds: [{type: Schema.Types.ObjectId, ref: 'Vehicle'}],
-        clientIds: [{type: Schema.Types.ObjectId, ref: 'Client'}]
+        //clientIds: [{type: Schema.Types.ObjectId, ref: 'Client'}]
     }
 );
 
@@ -30,8 +29,10 @@ UserSchema.statics.authenticate = function (email, password, callback) {
     User.findOne({email: email})
         .exec(function (err, user) {
             if (err) {
+                console.log('user',user);
                 return callback(err)
             } else if (!user) {
+                console.log('user1',user);
                 var err = new Error('User not found.');
                 err.status = 401;
                 return callback(err);
@@ -48,6 +49,7 @@ UserSchema.statics.authenticate = function (email, password, callback) {
 
 UserSchema.pre('save', function (next) {
     var user = this;
+    console.log('user',user);
     bcrypt.hash(user.password, 10, function (err, hash) {
         if (err) {
             return next(err);

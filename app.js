@@ -16,9 +16,11 @@ const repairRouter = require('./routes/repairs');
 const app = express();
 
 
+const CONNECTION_URI = process.env.MONGODB_URI || 'mongodb://localhost/usersDB';
+const PORT = process.env.PORT || 3000
 
 //connect to MongoDB
-mongoose.connect('mongodb://localhost/usersDB');
+mongoose.connect(CONNECTION_URI);
 const db = mongoose.connection;
 
 //handle mongo error
@@ -74,5 +76,9 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+// app.listen(PORT, () => {
+//     console.log(`Server is listening on port ${PORT}`)
+// })
 
 module.exports = app;

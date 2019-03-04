@@ -23,6 +23,7 @@ const VehicleSchema = new Schema(
 
         profilePhoto: PhotoSchema,
         repairsHistory: [{type: Schema.Types.ObjectId, ref: 'RepairList'}],
+        //repairsHistory: [RepairList],
 
         clientId: {type: Schema.Types.ObjectId, ref: 'Client'},
 

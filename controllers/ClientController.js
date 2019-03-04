@@ -45,6 +45,21 @@ module.exports.create = async function (req, res, next) {
         let result = await client.save();
 
         if(result){
+            // let user = await User.findOne({_id: req.body.userId});
+            //
+            // if(user.clientIds){
+            //     user.clientIds.push(result);
+            //     result = user.save();
+            //     if(result){
+            //         return res.json(client)
+            //     }
+            //     else{
+            //         return next(new Error('User save error'))
+            //     }
+            // }
+            // else{
+            //     return next(new Error('User not found'))
+            // }
             return res.json(client)
         }
         else{
@@ -61,14 +76,7 @@ module.exports.create = async function (req, res, next) {
 module.exports.read = function (req, res, next) {  //w użyciu
     if (req.query.userId) {
         Client.find({userId: req.query.userId})
-            // .populate('vehicleList')
-            // .populate('repairsHistory')
-            //.populate({path : 'vehicleList', populate : {path : 'repairsHistory', populate: {path: 'repairsList'}}})
-            // .populate([{
-            //     path: 'vehicleList'
-            // }, {
-            //     path: 'repairsHistory'
-            // }])
+            .populate({path : 'vehicleList', populate : {path : 'repairsHistory'}})
             .select('-userId')
             .exec(function (error, data) {
             if (error) {

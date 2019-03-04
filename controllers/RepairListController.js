@@ -19,7 +19,16 @@ module.exports.create = async function (req, res, next) {
     if (repairsList && vehicleID) {
         if (vehicle) {
             const array = R.map(object => new Repair({...object}))(repairsList);
-            let list = new RepairList({repairsList: array, finished:false});
+            //const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+            const dateOptions = { day: 'numeric', month: 'numeric', year: 'numeric', hour:'numeric', minute:'numeric'};
+            const date = new Date().toLocaleString('eu-PL',dateOptions);
+            let list = new RepairList(
+                {
+                    repairsList: array,
+                    finished:false,
+                    created_at: date,
+                    updated_at: date
+                });
             const confirm = await list.save();
             if(confirm){
                 vehicle.repairsHistory.push(list._id);
@@ -39,24 +48,25 @@ module.exports.create = async function (req, res, next) {
 };
 
 
-// module.exports.read = async function (req, res, next) {
-//     // let {_id, repairId} = req.query._id
-//     // console.log(_id);
-//     // if (_id) {
-//     const repairList = await Vehicle.find();
-//     let result = R.map(item => item.repairsHistory, repairList);
-//
-//     if (repairList === null) {
-//         let err = new Error('Not Found!');
-//         err.status = 400;
-//         return next(err);
-//     } else {
-//         return res.json(result)
-//         //data.repairsList.push(repairId)
-//     }
-//
-//
-// };
+module.exports.read = async function (req, res, next) {
+    // let {_id, repairId} = req.query._id
+    // console.log(_id);
+    // if (_id) {
+    const repairList = await Vehicle.find({_id:req.query.vehicleId})
+        .populate('repairsHistory')
+    //let result = R.map(item => item.repairsHistory, repairList);
+
+    if (repairList === null) {
+        let err = new Error('Not Found!');
+        err.status = 400;
+        return next(err);
+    } else {
+        return res.json(repairList)
+        //data.repairsList.push(repairId)
+    }
+
+
+};
 
 
 // module.exports.getUser = function (req, res, next) {

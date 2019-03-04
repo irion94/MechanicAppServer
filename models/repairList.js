@@ -4,10 +4,10 @@ const RepairSchema = require('../models/repair').Schema;
 
 const RepairListSchema = new Schema(
     {
-        repairsList: [{RepairSchema}],
+        repairsList: [RepairSchema],
         finished: Boolean,
-        ctreated_at: Date,
-        updated_at: Date
+        created_at: {type: Date},
+        updated_at: {type: Date}
     }
 );
 
