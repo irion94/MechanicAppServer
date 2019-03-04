@@ -20,7 +20,7 @@ const CONNECTION_URI = process.env.MONGODB_URI || 'mongodb://localhost/usersDB';
 const PORT = process.env.PORT || 3000
 
 //connect to MongoDB
-mongoose.connect('mongodb://dbIrion94:avalanche%40123@ds159185.mlab.com:59185/heroku_vvpmcd7w/usersDB');
+mongoose.connect(CONNECTION_URI);
 const db = mongoose.connection;
 
 //handle mongo error
