@@ -20,7 +20,7 @@ const CONNECTION_URI = process.env.MONGODB_URI || 'mongodb://localhost/usersDB';
 const PORT = process.env.PORT || 3000
 
 //connect to MongoDB
-mongoose.connect("mongodb+srv://dbIrion94:avalanche@123@cluster0-7lkbq.mongodb.net/test?retryWrites=true");
+mongoose.connect("mongodb+srv://dbIrion94:avalanche%40123@cluster0-7lkbq.mongodb.net/test?retryWrites=true");
 const db = mongoose.connection;
 
 //handle mongo error
