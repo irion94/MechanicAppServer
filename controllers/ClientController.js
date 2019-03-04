@@ -42,6 +42,8 @@ module.exports.create = async function (req, res, next) {
             email: email
         });
 
+        console.log(client);
+
         let result = await client.save();
 
         if(result){
