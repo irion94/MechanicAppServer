@@ -9,15 +9,15 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
 const usersRouter = require('./routes/users');
-const clientsRouter = require('./routes/clients');
-const vehiclesRouter = require('./routes/vehicles');
+const clientsRouter = require('./routes/clients.routes');
+const vehiclesRouter = require('./routes/vehicles.routes');
 const repairListsRouter = require('./routes/repairLists');
 const repairRouter = require('./routes/repairs');
 const app = express();
 
 
 const CONNECTION_URI = process.env.MONGODB_URI || 'mongodb://localhost/usersDB';
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
 
 //connect to MongoDB
 mongoose.connect(CONNECTION_URI);

@@ -7,7 +7,8 @@ const RepairListSchema = new Schema(
         repairsList: [RepairSchema],
         finished: Boolean,
         created_at: {type: Date},
-        updated_at: {type: Date}
+        updated_at: {type: Date},
+        vehicleId: {type: Schema.Types.ObjectId, ref: 'Vehicle'}
     }
 );
 

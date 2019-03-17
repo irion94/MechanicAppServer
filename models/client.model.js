@@ -4,7 +4,7 @@
  */
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
-const VehicleSchema = require('../models/vehicle').Schema;
+const VehicleSchema = require('./vehicle.model').Schema;
 
 const ClientSchema = new Schema(
     {
@@ -20,7 +20,7 @@ const ClientSchema = new Schema(
         nrDomuWlascicielaPojazdu: String,
         nrMieszkaniaWlascicielaPojazdu: String,
 
-        numerTelefonu: String,
+        phoneNumber: String,
         email: String,
 
          vehicleList: [{type: Schema.Types.ObjectId, ref: 'Vehicle'}],
@@ -32,6 +32,6 @@ const ClientSchema = new Schema(
     }
 );
 
-const Client = mongoose.model('Client', ClientSchema);
-module.exports = Client;
+const ClientModel = mongoose.model('Client', ClientSchema);
+module.exports = ClientModel;
 module.exports.Schema = ClientSchema;
