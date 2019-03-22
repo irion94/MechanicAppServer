@@ -13,32 +13,39 @@ const R = require('ramda')
  * @param next
  * @returns {Promise<*>} If pass -> clientId
  */
+
 module.exports.create = async function (req, res, next) {
-    console.log(req.query.args)
-    const args = JSON.parse(req.query.args); //parse array of args
+    const args = JSON.parse(req.body.args); //parse array of args
+    //const update = JSON.parse(req.query.update); //parse array of args
     const merged = R.mergeAll(args); //merge into one object
-    if (merged.imieWlascicielaPojazdu && merged.nazwiskoWlascicielaPojazdu && (merged.phoneNumber || merged.email)) {
-        let doc = await Client.findOne(merged)
+    if (merged.imieWlascicielaPojazdu && merged.nazwiskoWlascicielaPojazdu && merged.numerPESELLubREGONWlascicielaPojazdu) {
+        let doc = await Client.findOne({imieWlascicielaPojazdu: merged.imieWlascicielaPojazdu, nazwiskoWlascicielaPojazdu: merged.nazwiskoWlascicielaPojazdu, numerPESELLubREGONWlascicielaPojazdu: merged.numerPESELLubREGONWlascicielaPojazdu});
         if (!doc) {
             const client = new Client({
                 ...merged,
                 //userId: req.session.userId,
+                userId: req.session.userId,
                 ctreated_at: Date.now(),
                 updated_at: Date.now(),
             });
             if (await client.save()) {
-                res.json(client)
+                res.json({message: "Create new client", data: client})
             }
             else {
-                res.status(404).json({message: "doc not save"})
+                res.status(404).json({message: "Save error", data:{}})
             }
         }
         else {
-            res.status(200).json(doc)
+            const userId = req.session.userId;
+            if(!R.contains(userId, doc.userId)){
+                doc.userId.push(req.session.userId)
+                doc.save()
+            }
+            res.status(200).json({message: "Client found", data:doc})
         }
 
     } else {
-        res.status(404).json({message: "all params needed"})
+        return res.status(404).send("'All field required!'").end()
     }
 };
 
@@ -65,7 +72,7 @@ module.exports.readAll = async (req, res, next) => {
     if (!docs) {
         res.status(404).json({message: "doc not exist"})
     }
-
+    console.log(docs)
     res.status(200).json(docs)
 };
 

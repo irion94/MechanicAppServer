@@ -18,7 +18,7 @@ module.exports.create = async function(req, res, next){
             username: req.body.username,
             password: req.body.password,
         });
-        console.log(userData)
+        // console.log(userData)
 
         await userData.save()
             .then( result => {
@@ -48,7 +48,7 @@ module.exports.login = function (req, res, next) {
                 return next(err);
             } else {
                 req.session.userId = user._id;
-                console.log("session start", req.session)
+                // console.log("session start", req.session)
                 return res.json(user);
             }
         });
@@ -61,7 +61,7 @@ module.exports.login = function (req, res, next) {
 };
 
 module.exports.logout = function (req, res, next) {
-    console.log(req)
+    // console.log(req)
     if (req.session) {
         // delete session object
         req.session.destroy(function (err) {

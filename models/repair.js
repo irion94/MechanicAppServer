@@ -4,11 +4,9 @@ const PhotoSchema = require('../models/photo').PhotoSchema;
 
 const RepairsSchema = new Schema(
     {
-        tytul: String,
-        opis: String,
-        photos: [PhotoSchema],
-        created_at: Date,
-        updated_at: Date
+        title: String,
+        description: String,
+        photos: [String]
     }
 );
 const Repair = mongoose.model('Repair', RepairsSchema);

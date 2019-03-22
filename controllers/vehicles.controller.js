@@ -2,7 +2,6 @@
  *
  */
 const R = require("ramda");
-
 const Vehicle = require('../models/vehicle.model');
 const Client = require('../models/client.model');
 
@@ -15,7 +14,8 @@ module.exports.create = async  (req, res, next) => {
         args.numerRejestracyjnyPojazdu &&
         args.numerIdentyfikacyjnyPojazdu
     ) {
-        let doc = await Vehicle.findOne(merged);
+        let doc = await Vehicle.findOne({numerIdentyfikacyjnyPojazdu: merged.numerIdentyfikacyjnyPojazdu})
+            .populate('repairsHistory');
         if (!doc) {
             const vehicle = new Vehicle({
                 ...merged,
@@ -27,14 +27,23 @@ module.exports.create = async  (req, res, next) => {
             let cli = await Client.findOne({_id: vehicle.clientId});
             cli.vehicleList.push(vehicle);
             if (await vehicle.save() && await cli.save()) {
-                res.json(vehicle)
+                res.json({message: "Create new vehicle", data: vehicle})
             }
             else {
                 res.status(404).json({message: "save error"})
             }
         }
         else {
-            res.status(404).json({message: "item exist"})
+            if(R.identical(doc.clientId.toString(),merged.clientId.toString())){
+                res.status(200).json({message: "Vehicle found, owner mach!.", data:doc})
+            }
+            else{
+                await Client.findOneAndUpdate({_id: merged.clientId}, { "$push": { "vehicleList": doc._id } }).exec();
+                await Client.findOneAndUpdate({_id: doc.clientId}, {"$pull": {"vehicleList": doc._id}}).exec();
+                doc.clientId = merged.clientId;
+                await doc.save();
+                res.status(200).json({message: "Vehicle found, owner change!.", data:doc})
+            }
         }
 
     } else {

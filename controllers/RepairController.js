@@ -5,8 +5,8 @@ const Repair = require('../models/repair');
 
 module.exports.create = function (req, res, next) {
     let {
-        tytul,
-        opis
+        title,
+        description
     } = req;
 
     console.log(req.params, req);
@@ -14,8 +14,8 @@ module.exports.create = function (req, res, next) {
     if (tytul && opis) {
 
         const repairData = {
-            tytul: tytul,
-            opis: opis,
+            tytul: title,
+            opis: description,
         };
 
         Repair.insertMany(repairData, function (error, data) {

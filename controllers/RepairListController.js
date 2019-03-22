@@ -8,49 +8,29 @@ const Repair = require('../models/repair');
 const R = require('ramda');
 
 module.exports.create = async function (req, res, next) {
-    let {
-        repairsList,
-        vehicleId
-    } = req.body;
-
-    repairsList  = JSON.parse(repairsList);
-
-    let vehicle = await Vehicle.findOne({_id: vehicleId});
-
-    if (repairsList && vehicleId) {
+    let repairsList = req.body.params;
+    if (typeof repairsList === "string") {
+        repairsList = JSON.parse(repairsList);
+        let vehicle = await Vehicle.findOne({_id: repairsList.vehicleId});
+        // const dateOptions = { day: 'numeric', month: 'numeric', year: 'numeric', hour:'numeric', minute:'numeric'};
+        // const date = new Date().toLocaleString('eu-PL',dateOptions);
+        let list = new RepairList(repairsList);
+        await list.save();
         if (vehicle) {
-            const array = R.map(object => new Repair({...object}))(repairsList);
-            //const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-            const dateOptions = { day: 'numeric', month: 'numeric', year: 'numeric', hour:'numeric', minute:'numeric'};
-            const date = new Date().toLocaleString('eu-PL',dateOptions);
-            let list = new RepairList(
-                {
-                    repairsList: array,
-                    finished:false,
-                    vehicleId: vehicleId,
-                    created_at: date,
-                    updated_at: date
-                });
-            const confirm = await list.save();
-            if(confirm){
-                vehicle.repairsHistory.push(list._id);
-                vehicle.save();
-                return res.json({ctreated: true, vehicle})
-            }
-            else{
-                return next(new Error('Save error'));
+            vehicle.repairsHistory.push(list)
+            let confirm = await vehicle.save();
+            if (confirm) {
+                res.status(200).json({message: "created", data: vehicle})
             }
         }
     }
-    else {
-        let err = new Error('All fields required.');
-        err.status = 400;
-        return next(err);
+    else{
+        res.status(400).json({message: "Require params!"})
     }
 };
 
 
-getRepairLists = ( array ) => {
+getRepairLists = (array) => {
     const vehicles = R.pipe(
         R.map(R.prop('vehicleList')),
     )(array);
@@ -95,7 +75,7 @@ module.exports.read = async function (req, res, next) {
                 checkIf
             )(array);
 
-            console.log('progress',repairsInProgress)
+            console.log('progress', repairsInProgress)
 
             return res.json(repairsInProgress);
         }

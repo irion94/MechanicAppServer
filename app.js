@@ -40,8 +40,15 @@ app.use(session({
 }));
 
 // parse incoming requests
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({
+    limit: '20mb'
+}));
+
+app.use(bodyParser.urlencoded({
+    limit: '20mb',
+    parameterLimit: 100000,
+    extended: true
+}));
 
 
 
