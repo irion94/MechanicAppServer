@@ -3,52 +3,42 @@
  */
 const R = require("ramda");
 const Vehicle = require('../models/vehicle.model');
-const Client = require('../models/client.model');
+const Client = require('../models/document.model');
 
 //Create and update clients vehicleList
 module.exports.create = async  (req, res, next) => {
-    const args = JSON.parse(req.query.args); //parse array of args
-    const merged = R.mergeAll(args); //merge into one object
-    if (args.markaPojazdu &&
-        args.modelPojazdu &&
-        args.numerRejestracyjnyPojazdu &&
-        args.numerIdentyfikacyjnyPojazdu
-    ) {
-        let doc = await Vehicle.findOne({numerIdentyfikacyjnyPojazdu: merged.numerIdentyfikacyjnyPojazdu})
-            .populate('repairsHistory');
+    const args = req.body;
+    console.log(args)
+    let doc = await Client.findOne({'vehicleList.markaPojazdu': args.data.markaPojazdu});
         if (!doc) {
             const vehicle = new Vehicle({
-                ...merged,
+                ...args.data,
                 //userId: req.session.userId,
-                ctreated_at: Date.now(),
+                created_at: Date.now(),
                 updated_at: Date.now(),
             });
 
-            let cli = await Client.findOne({_id: vehicle.clientId});
-            cli.vehicleList.push(vehicle);
-            if (await vehicle.save() && await cli.save()) {
+            let update = await Client.findOneAndUpdate({_id: args.clientId}, {$push: {vehicleList: vehicle}});
+            if (update) {
                 res.json({message: "Create new vehicle", data: vehicle})
             }
             else {
                 res.status(404).json({message: "save error"})
             }
         }
+        // podmianka!
         else {
-            if(R.identical(doc.clientId.toString(),merged.clientId.toString())){
-                res.status(200).json({message: "Vehicle found, owner mach!.", data:doc})
+            if(R.identical(doc._id.toString(),args.clientId.toString())){
+                res.status(200).json({message: "Vehicle found, owner mach!.", data:R.filter(item => args.data.numerIdentyfikacyjnyPojazdu === item.numerIdentyfikacyjnyPojazdu, doc.vehicleList).pop()})
             }
             else{
-                await Client.findOneAndUpdate({_id: merged.clientId}, { "$push": { "vehicleList": doc._id } }).exec();
-                await Client.findOneAndUpdate({_id: doc.clientId}, {"$pull": {"vehicleList": doc._id}}).exec();
-                doc.clientId = merged.clientId;
+                await Client.findOneAndUpdate({_id: args.clientId}, { "$push": { "vehicleList": doc} }).exec();
+                await Client.findOneAndUpdate({_id: doc.clientId}, {"$pull": {"vehicleList": doc}}).exec();
+                doc.clientId = args.clientId;
                 await doc.save();
                 res.status(200).json({message: "Vehicle found, owner change!.", data:doc})
             }
         }
-
-    } else {
-        res.status(404).json({message: "all params needed"})
-    }
 };
 
 /**
@@ -66,8 +56,9 @@ module.exports.create = async  (req, res, next) => {
 module.exports.read = async function (req, res, next) {
     const userId = req.query.userId;
     if (userId) {
-        const doc = await Client.find({userId: userId})
-            .populate({path: 'vehicleList', populate: {path: 'repairsHistory'}});
+        const doc = await Vehicle.find({"repairsHistory.finished": true})
+        console.log(doc)
+        //.populate({path: 'vehicleList', populate: {path: 'repairsHistory'}});
         if (!doc) {
             res.status(404).json({message: "doc not exist"})
         }

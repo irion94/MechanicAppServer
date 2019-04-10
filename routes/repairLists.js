@@ -13,7 +13,7 @@ const read = require('../controllers/RepairListController').read;
 // POST Insert new Client
 router.post('/', create);
 
-router.get('/', read);
+router.get('/:id/:clientId?', read);
 
 //GET Clients
 //router.get('/', getUser);

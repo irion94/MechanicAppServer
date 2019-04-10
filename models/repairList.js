@@ -8,7 +8,8 @@ const RepairListSchema = new Schema(
         finished: Boolean,
         created_at: {type: Date},
         updated_at: {type: Date},
-        vehicleId: {type: Schema.Types.ObjectId, ref: 'Vehicle'}
+        vehicleId: {type: Schema.Types.ObjectId, ref: 'Vehicle'},
+        userId: {type: Schema.Types.ObjectId, ref: 'User'}
     }
 );
 

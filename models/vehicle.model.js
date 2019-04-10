@@ -6,7 +6,7 @@
 let mongoose = require('mongoose');
 let Schema =  mongoose.Schema;
 const PhotoSchema = require('../models/photo').PhotoSchema;
-const RepairList = require('../models/repair').Schema;
+const RepairListSchema = require('../models/repairList').Schema;
 
 const VehicleSchema = new Schema(
     {
@@ -22,20 +22,17 @@ const VehicleSchema = new Schema(
         dataPierwszejRejestracjiPojazdu: String,
 
         profilePhoto: PhotoSchema,
-        repairsHistory: [{type: Schema.Types.ObjectId, ref: 'RepairList'}],
-        //repairsHistory: [RepairList],
-
+        //repairsHistory: [{type: Schema.Types.ObjectId, ref: 'RepairList'}],
+        repairsHistory: [RepairListSchema],
         clientId: {type: Schema.Types.ObjectId, ref: 'Client'},
 
         created_at: Date,
         updated_at: Date
-    }
+    },
+    {_id: false}
 );
 
 
 const VehicleModel = mongoose.model('Vehicle', VehicleSchema);
-
-let veh = new VehicleModel({});
-console.log('veh',veh);
 module.exports = VehicleModel;
 module.exports.Schema = VehicleSchema;

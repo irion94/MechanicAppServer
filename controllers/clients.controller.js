@@ -1,9 +1,9 @@
 /**
  * CONTROLLER
  */
-const Client = require('../models/client.model');
+const Client = require('../models/document.model');
 const Vehicle = require('../models/vehicle.model');
-const User = require('../models/user');
+const User = require('../models/user.model');
 const R = require('ramda')
 
 /**
@@ -13,92 +13,88 @@ const R = require('ramda')
  * @param next
  * @returns {Promise<*>} If pass -> clientId
  */
-
-module.exports.create = async function (req, res, next) {
-    const args = JSON.parse(req.body.args); //parse array of args
-    //const update = JSON.parse(req.query.update); //parse array of args
-    const merged = R.mergeAll(args); //merge into one object
-    if (merged.imieWlascicielaPojazdu && merged.nazwiskoWlascicielaPojazdu && merged.numerPESELLubREGONWlascicielaPojazdu) {
-        let doc = await Client.findOne({imieWlascicielaPojazdu: merged.imieWlascicielaPojazdu, nazwiskoWlascicielaPojazdu: merged.nazwiskoWlascicielaPojazdu, numerPESELLubREGONWlascicielaPojazdu: merged.numerPESELLubREGONWlascicielaPojazdu});
-        if (!doc) {
-            const client = new Client({
-                ...merged,
-                //userId: req.session.userId,
-                userId: req.session.userId,
-                ctreated_at: Date.now(),
-                updated_at: Date.now(),
-            });
-            if (await client.save()) {
-                res.json({message: "Create new client", data: client})
-            }
-            else {
-                res.status(404).json({message: "Save error", data:{}})
-            }
-        }
-        else {
-            const userId = req.session.userId;
-            if(!R.contains(userId, doc.userId)){
-                doc.userId.push(req.session.userId)
-                doc.save()
-            }
-            res.status(200).json({message: "Client found", data:doc})
-        }
-
-    } else {
-        return res.status(404).send("'All field required!'").end()
-    }
-};
-
-//Find ONE REST Full
-module.exports.readOne = async (req, res, next) => {
-    const args = JSON.parse(req.params.args); //parse array of args
-    const merged = R.mergeAll(args); //merge into one object
-    const doc = await Client.findOne(merged)
-        .populate({path: 'vehicleList', populate: {path: 'repairsHistory'}})
-        .select('-userId')
-        .exec();
-    if (!doc) {
-        res.status(404).json({message: "doc not exist"})
-    }
-
-    res.status(200).json(doc)
-};
-
-//FindAll
-module.exports.readAll = async (req, res, next) => {
-    const docs = await Client.find({userId: req.params.userId})
-        .populate({path: 'vehicleList', populate: {path: 'repairsHistory'}})
-        .select('-userId').exec();
-    if (!docs) {
-        res.status(404).json({message: "doc not exist"})
-    }
-    console.log(docs)
-    res.status(200).json(docs)
-};
-
-
-module.exports.update = async (req, res, next) => {
-    const client = JSON.parse(req.query.client); //parse array of args
-    const merged = R.mergeAll(client); //merge into one object
-    const ve = JSON.parse(req.query.vehicle);
-
-    const doc = await Client.findByIdAndUpdate(client,
-        {$push: ve},
-        function(err, doc) {
-            if(err){
-                console.log(err);
-            }else{
-                //do stuff
-                doc.vehicleList.push(ve);
-                doc.save();
-                res.json(doc)
-            }
-        }
-    );
-    if (!doc) {
-        res.status(400).json({message: "doc not updated"})
-    }
-};
+//
+// module.exports.create = async function (req, res, next) {
+//     let args = req.body.data; //parse array of args
+//     let doc = await Client.findOne({numerPESELLubREGONWlascicielaPojazdu: args.numerPESELLubREGONWlascicielaPojazdu})
+//     if (!doc) {
+//         const client = new Client({
+//             ...args,
+//             //userId: req.session.userId,
+//             userId: req.session.userId,
+//             ctreated_at: Date.now(),
+//             updated_at: Date.now(),
+//         });
+//         if (await client.save()) {
+//             res.json({message: "Create new client", data: client})
+//         }
+//         else {
+//             res.status(404).json({message: "Save error", data: {}})
+//         }
+//     }
+//     else {
+//         const userId = req.body.userId;
+//         if (!R.contains(userId, doc.userId)) {
+//             doc.userId.push(req.session.userId)
+//             doc.save()
+//         }
+//         res.status(200).json({message: "Client found", data: doc})
+//     }
+// };
+//
+// // findOne({_id: args.clientId, 'vehicleList.repairsHistory.finished': true}, {_id:1,'vehicleList.$': 1})
+// //Find ONE REST Full
+// module.exports.readOne = async (req, res, next) => {
+//     const args = JSON.parse(req.params.args); //parse array of args
+//     //const merged = R.mergeAll(args); //merge into one object
+//     console.log("body:", args)
+//     const doc = await Client.findOne({_id: args.clientId, 'vehicleList.repairsHistory.userId': args.userId})
+//         .select('-userId -vehicleList')
+//         .exec();
+//     console.log("_------", doc)
+//     if (!doc) {
+//         res.status(404).json({message: "doc not exist"})
+//     }
+//
+//     res.status(200).json(doc)
+// };
+//
+// //FindAll
+// module.exports.readAll = async (req, res, next) => {
+//     const docs = await Client
+//         .find({userId: req.params.userId})
+//         .select('-userId -vehicleList').exec();
+//
+//     if (!docs) {
+//         res.status(404).json({message: "doc not exist"})
+//     }
+//     console.log("DOCS:", docs)
+//     res.status(200).json(docs)
+// };
+//
+//
+// module.exports.update = async (req, res, next) => {
+//     const client = JSON.parse(req.query.client); //parse array of args
+//     const merged = R.mergeAll(client); //merge into one object
+//     const ve = JSON.parse(req.query.vehicle);
+//
+//     const doc = await Client.findByIdAndUpdate(client,
+//         {$push: ve},
+//         function(err, doc) {
+//             if(err){
+//                 console.log(err);
+//             }else{
+//                 //do stuff
+//                 doc.vehicleList.push(ve);
+//                 doc.save();
+//                 res.json(doc)
+//             }
+//         }
+//     );
+//     if (!doc) {
+//         res.status(400).json({message: "doc not updated"})
+//     }
+// };
 
 // module.exports.update = async function (req, res, next) {
 //     let {

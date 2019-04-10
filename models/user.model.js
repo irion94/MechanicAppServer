@@ -8,32 +8,30 @@ exports.UserSchema = UserSchema = new Schema(
             type: String,
             unique: true,
             required: true,
-            trim: true
-        },
-        username: {
-            type: String,
-            unique: true,
-            required: true,
-            trim: true
+            //trim: true
         },
         password: {
             type: String,
             required: true,
         },
-        //clientIds: [{type: Schema.Types.ObjectId, ref: 'Client'}]
+        permission: {
+            type: Boolean,
+            required: true
+        },
+        documents: [{type: Schema.Types.ObjectId, ref: 'Document'}]
     }
 );
 
 //authenticate input against database
 UserSchema.statics.authenticate = function (email, password, callback) {
-    User.findOne({email: email})
+    UserModel.findOne({email: email})
         .exec(function (err, user) {
             if (err) {
                 console.log('user',user);
                 return callback(err)
             } else if (!user) {
                 console.log('user1',user);
-                var err = new Error('User not found.');
+                let err = new Error('User not found.');
                 err.status = 401;
                 return callback(err);
             }
@@ -59,5 +57,5 @@ UserSchema.pre('save', function (next) {
     })
 });
 
-const User = mongoose.model('User', UserSchema);
-module.exports = User;
+const UserModel = mongoose.model('User', UserSchema);
+module.exports = UserModel;

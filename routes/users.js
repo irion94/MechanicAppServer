@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user');
-const createUser  = require( '../controllers/UserController').create;
-const loginUser  = require( '../controllers/UserController').login;
-const logoutUser = require( '../controllers/UserController').logout;
+const User = require('../models/user.model');
+const createUser  = require( '../controllers/user.controller').create;
+const loginUser  = require( '../controllers/user.controller').login;
+const logoutUser = require( '../controllers/user.controller').logout;
 
 //POST Create New User (NOT CUSTOMER!)
 router.post('/', createUser);

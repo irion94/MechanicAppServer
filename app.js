@@ -9,6 +9,8 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
 const usersRouter = require('./routes/users');
+const documentsRouter = require('./routes/document.routes');
+
 const clientsRouter = require('./routes/clients.routes');
 const vehiclesRouter = require('./routes/vehicles.routes');
 const repairListsRouter = require('./routes/repairLists');
@@ -63,6 +65,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/users', usersRouter);
+app.use('/documents', documentsRouter);
+
+
 app.use('/clients', clientsRouter);
 app.use('/vehicles', vehiclesRouter);
 app.use('/repair', repairRouter);
