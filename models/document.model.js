@@ -4,12 +4,15 @@
  */
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
-const Personalities = require('./personalities.model').Schema;
-const VehicleSchema = require('./vehicle.model').Schema;
+const OtherData = require('../models/otherdata.model').Schema;
+// const Personalities = require('./personalities.model').Schema;
+// const VehicleSchema = require('./vehicle.model').Schema;
+
 
 
 const DocumentSchema = new Schema(
     {
+        otherData: OtherData,
         personalities: {},
         vehicle:{},
         created_at: Date,

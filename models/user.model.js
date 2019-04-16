@@ -18,7 +18,8 @@ exports.UserSchema = UserSchema = new Schema(
             type: Boolean,
             required: true
         },
-        documents: [{type: Schema.Types.ObjectId, ref: 'Document'}]
+        documents: [{type: Schema.Types.ObjectId, ref: 'Document'}],
+        clients: [{type: Schema.Types.ObjectId, ref: 'User'}],
     }
 );
 

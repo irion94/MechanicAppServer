@@ -7,16 +7,18 @@ const Client = require('../models/document.model');
 const Vehicle = require('../models/vehicle.model');
 const RepairList = require('../models/repairList');
 const Repair = require('../models/repair');
+const Document = require('../models/document.model');
 const R = require('ramda');
 
 module.exports.create = async function (req, res, next) {
     let args = req.body;
-    console.log(args);
-    let vehicle = await Client.findOne({"vehicleList._id": args.vehicleId});
     let list = new RepairList(args.data);
-    const update = await Client.findOneAndUpdate({"vehicleList._id": args.vehicleId}, {$push: {'vehicleList.$.repairsHistory': list}})
-    if (update) {
-        res.status(200).json({message: "created", data: vehicle})
+    console.log(list)
+    if (await Document.findOneAndUpdate({"_id": args.docId}, {$push: {'vehicle.repairsHistory': list}})) {
+        res.status(200).json({message: "created"})
+    }
+    else{
+        res.status(400).json({message: "Error"})
     }
     // if (vehicle) {
     //     //await list.save();
@@ -28,7 +30,7 @@ module.exports.create = async function (req, res, next) {
     // }
 };
 
-
+//______------------------//______------------------//______------------------//______------------------
 getRepairLists = (array) => {
     const vehicles = R.pipe(
         R.map(R.prop('vehicleList')),
@@ -174,3 +176,30 @@ module.exports.read = async function (req, res, next) {
 //         })
 //     }
 // };
+
+// {
+//     $project: {
+//         personalities: 1,
+//         vehicle: {
+//             $mergeObjects: [
+//                 "$vehicle",
+//                 {
+//                     "repairsHistory":
+//                         {
+//                             $filter: {
+//                                 input: "$repairsHistory",
+//                                 as: "repairsHistory",
+//                                 cond: {
+//                                     $or: [
+//                                         {$and: [{$gt: [{$size: "$repairsHistory"}, 0]}, {$eq: ["$$repairsHistory.userId", mongoose.Types.ObjectId(req.params.ids)]}]},
+//                                         {$eq: ["$$repairsHistory.finished", true]}
+//                                     ]
+//                                 }
+//                             }
+//                         }
+//                 }
+//             ]
+//         }
+//     }
+//
+// },
