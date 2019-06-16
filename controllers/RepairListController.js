@@ -1,34 +1,56 @@
 /**
  * CONTROLLER
  */
+
 const mongoose = require("mongoose");
 
 const Client = require('../models/document.model');
-const Vehicle = require('../models/vehicle.model');
-const RepairList = require('../models/repairList');
-const Repair = require('../models/repair');
+const Vehicle = require('../models/embeded/document/vehicle.model');
+const RepairList = require('../models/embeded/document/repairList');
+const Repair = require('../models/embeded/document/post.model');
 const Document = require('../models/document.model');
+const User = require('../models/user.model');
 const R = require('ramda');
 
 module.exports.create = async function (req, res, next) {
     let args = req.body;
     let list = new RepairList(args.data);
-    console.log(list)
+    console.log(list, args.docId)
     if (await Document.findOneAndUpdate({"_id": args.docId}, {$push: {'vehicle.repairsHistory': list}})) {
+        const user = await User.findOneAndUpdate({
+            documents: args.docId,
+            permission: false
+        }, {$addToSet: {clients: mongoose.Types.ObjectId(args.data.userId)}});
+        console.log(user)
         res.status(200).json({message: "created"})
     }
     else{
         res.status(400).json({message: "Error"})
     }
-    // if (vehicle) {
-    //     //await list.save();
-    //     vehicle.repairsHistory.push(list)
-    //     let confirm = await vehicle.save();
-    //     if (confirm) {
-    //         res.status(200).json({message: "created", data: vehicle})
-    //     }
-    // }
 };
+
+
+module.exports.update = async function (req, res, next) {
+    console.log(req.body)
+    let set = {};
+    if (req.body.finished !== undefined) set = {...set, 'vehicle.repairsHistory.$.finished': req.body.finished};
+    if (req.body.deadLine !== undefined) set = {...set, 'vehicle.repairsHistory.$.deadLine': req.body.deadLine};
+
+    let doc = await Document.updateOne({"vehicle.repairsHistory": {$elemMatch: {_id: mongoose.Types.ObjectId(req.body.data._id)}}}, {
+        $set: set
+    });
+    if (doc.ok) res.status(200).json({message: "Updated!"});
+    else res.status(304)
+};
+
+module.exports.delete = async function (req, res, next) {
+    console.log(req.body)
+    let doc = await Document.updateOne({'vehicle.repairsHistory': {$elemMatch: {_id: mongoose.Types.ObjectId(req.body._id)}}}, {$pull: {'vehicle.repairsHistory': {_id: mongoose.Types.ObjectId(req.body._id)}}});
+    console.log(doc)
+    if (doc.ok) res.status(200).json({message: "Deleted!"});
+    else res.status(304)
+};
+
 
 //______------------------//______------------------//______------------------//______------------------
 getRepairLists = (array) => {

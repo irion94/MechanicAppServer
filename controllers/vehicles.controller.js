@@ -2,7 +2,7 @@
  *
  */
 const R = require("ramda");
-const Vehicle = require('../models/vehicle.model');
+const Vehicle = require('../models/embeded/document/vehicle.model');
 const Client = require('../models/document.model');
 
 //Create and update clients vehicleList

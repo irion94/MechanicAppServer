@@ -6,7 +6,7 @@ let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 const VehicleSchema = require('./vehicle.model').Schema;
 
-const PersonalitiesSchema = new Schema(
+const VehicleOwnerSchema = new Schema(
     {
         pelneNazwiskoLubNazwaWlascicielaPojazdu: String,
         imieWlascicielaPojazdu: String,
@@ -26,6 +26,6 @@ const PersonalitiesSchema = new Schema(
     { _id : false }
 );
 
-const Personalities = mongoose.model('Personalities', PersonalitiesSchema);
-module.exports = Personalities;
-module.exports.Schema = PersonalitiesSchema;
+const VehicleOwner = mongoose.model('VehicleOwner', VehicleOwnerSchema);
+module.exports = VehicleOwner;
+module.exports.Schema = VehicleOwnerSchema;

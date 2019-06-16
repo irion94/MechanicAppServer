@@ -1,7 +1,7 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
-
+const UserData = require('./embeded/document/userData.model').Schema;
 exports.UserSchema = UserSchema = new Schema(
     {
         email: {
@@ -18,21 +18,22 @@ exports.UserSchema = UserSchema = new Schema(
             type: Boolean,
             required: true
         },
+        userData: {},
         documents: [{type: Schema.Types.ObjectId, ref: 'Document'}],
         clients: [{type: Schema.Types.ObjectId, ref: 'User'}],
     }
 );
 
 //authenticate input against database
-UserSchema.statics.authenticate = function (email, password, callback) {
+UserSchema.statics.authenticate = (email, password, callback) => {
+    console.log("jestem tutjaj1",email, password)
     UserModel.findOne({email: email})
         .exec(function (err, user) {
             if (err) {
-                console.log('user',user);
                 return callback(err)
             } else if (!user) {
-                console.log('user1',user);
                 let err = new Error('User not found.');
+                console.log("jestem tutjaj2")
                 err.status = 401;
                 return callback(err);
             }
@@ -44,10 +45,10 @@ UserSchema.statics.authenticate = function (email, password, callback) {
                 }
             })
         });
-}
+};
 
 UserSchema.pre('save', function (next) {
-    var user = this;
+    let user = this;
     console.log('user',user);
     bcrypt.hash(user.password, 10, function (err, hash) {
         if (err) {

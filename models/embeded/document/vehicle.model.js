@@ -5,8 +5,8 @@
 
 let mongoose = require('mongoose');
 let Schema =  mongoose.Schema;
-const PhotoSchema = require('../models/photo').PhotoSchema;
-const RepairListSchema = require('../models/repairList').Schema;
+const RepairListSchema = require('./repairList').Schema;
+const MoreVehicleData = require('../moreVehicleData.model').Schema;
 
 const VehicleSchema = new Schema(
     {
@@ -21,8 +21,9 @@ const VehicleSchema = new Schema(
         rodzajPaliwa: String,
         dataPierwszejRejestracjiPojazdu: String,
 
-        profilePhoto: PhotoSchema,
+        // profilePhoto: PhotoSchema,
         //repairsHistory: [{type: Schema.Types.ObjectId, ref: 'RepairList'}],
+        moreVehicleData: MoreVehicleData,
         repairsHistory: [RepairListSchema],
         clientId: {type: Schema.Types.ObjectId, ref: 'Client'},
 

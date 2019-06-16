@@ -2,7 +2,7 @@
  * CONTROLLER
  */
 const Client = require('../models/document.model');
-const Vehicle = require('../models/vehicle.model');
+const Vehicle = require('../models/embeded/document/vehicle.model');
 const User = require('../models/user.model');
 const R = require('ramda')
 
@@ -44,20 +44,18 @@ const R = require('ramda')
 //
 // // findOne({_id: args.clientId, 'vehicleList.repairsHistory.finished': true}, {_id:1,'vehicleList.$': 1})
 // //Find ONE REST Full
-// module.exports.readOne = async (req, res, next) => {
-//     const args = JSON.parse(req.params.args); //parse array of args
-//     //const merged = R.mergeAll(args); //merge into one object
-//     console.log("body:", args)
-//     const doc = await Client.findOne({_id: args.clientId, 'vehicleList.repairsHistory.userId': args.userId})
-//         .select('-userId -vehicleList')
-//         .exec();
-//     console.log("_------", doc)
-//     if (!doc) {
-//         res.status(404).json({message: "doc not exist"})
-//     }
-//
-//     res.status(200).json(doc)
-// };
+module.exports.readOne = async (req, res, next) => {
+    console.log('trolololo', req.params)
+    const doc = await User.findOne({documents: req.params.id, permission: false})
+        .select('userData')
+        .exec();
+    console.log("_------", doc)
+    if (!doc) {
+        res.status(404).json({message: "doc not exist"})
+    }
+
+    res.status(200).json({message: 'success', data: doc})
+};
 //
 // //FindAll
 // module.exports.readAll = async (req, res, next) => {

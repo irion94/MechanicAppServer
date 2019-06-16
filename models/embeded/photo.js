@@ -3,12 +3,11 @@ let Schema = mongoose.Schema;
 
 const PhotoSchema = new Schema(
     {
-        tytul: String,
-        link: String,
+        title: String,
+        path: String,
         created_at: Date,
-        updated_at: Date
     }
 );
 
-module.exports.PhotoSchema = PhotoSchema;
+module.exports.Schama = PhotoSchema;
 module.exports.Photo = mongoose.model('Photo', PhotoSchema);

@@ -3,9 +3,11 @@ const R = require("ramda");
 const mongoose = require("mongoose");
 
 const User = require('../models/user.model');
-const Personalities = require('../models/personalities.model');
-const Vehicle = require('../models/vehicle.model');
+const VehicleOwner = require('../models/embeded/document/vehicleOwner.model');
+const DocumentOwner = require('../models/embeded/document/docuemntOwner.model');
+const Vehicle = require('../models/embeded/document/vehicle.model');
 const Document = require('../models/document.model');
+const OtherData = require('../models/embeded/otherdata.model');
 
 /**
  * To ma sens! Podczas tworzenia dokumentu system sprawdza odnajduje tylko ostatnio dodany dokument,
@@ -18,6 +20,7 @@ const Document = require('../models/document.model');
  */
 module.exports.create = async function (req, res, next) {
     let body = req.body.data; // {data:{vehicle:{}, personalities:{}}, userId}
+    console.log(body)
 
     let doc = await Document.findOne(
         {
@@ -30,8 +33,9 @@ module.exports.create = async function (req, res, next) {
     };
     if (!doc) {
         const doc = new Document({
-            otherData: {base64: body.base64},
-            personalities: new Personalities({...body.personalities}),
+            otherData: new OtherData({base64: body.base64}),
+            vehicleOwner: new VehicleOwner({...body.vehicleOwner}),
+            documentOwner: new DocumentOwner({...body.documentOwner}),
             vehicle: new Vehicle({...body.vehicle}),
             created_at: Date.now(),
             updated_at: Date.now(),
@@ -50,10 +54,11 @@ module.exports.create = async function (req, res, next) {
         }
     }
     else {
-        if (doc.personalities.numerPESELLubREGONWlascicielaPojazdu.localeCompare(body.personalities.numerPESELLubREGONWlascicielaPojazdu)) {
+        if (doc.vehicleOwner.numerPESELLubREGONWlascicielaPojazdu.localeCompare(body.vehicleOwner.numerPESELLubREGONWlascicielaPojazdu)) {
             const newOwner = new Document({
                 otherData: new OtherData({base64: body.base64}),
-                personalities: new Personalities({...body.personalities}),
+                vehicleOwner: new VehicleOwner({...body.vehicleOwner}),
+                documentOwner: new DocumentOwner({...body.documentOwner}),
                 vehicle: new Vehicle(doc.vehicle),
                 created_at: Date.now(),
                 updated_at: Date.now(),
@@ -72,13 +77,15 @@ module.exports.create = async function (req, res, next) {
             }
         }
         else if(await User.findOne({documents: doc})){
-            if (await User.findOne({_id: req.body.userId, "documents": mongoose.Types.ObjectId(doc._id)})) { //jeśli doc istnieje a ty posiadasz już jego id
-                //TODO: To to samo zapytanie jest! Zedytu to niżej by działało!
-                doc = await findDocumentForMechanic_create(doc._id, req.body.userId)
-                res.status(200).json({message: "Client found", data: doc[0]})
-            }
-            else if (await updateDocList(doc, req.body.userId)) { // w przeciwnym wypadku updatuj swoja liste dokumentow
-                doc = await findDocumentForMechanic_create(doc._id)
+            // if (await User.findOne({_id: req.body.userId, "documents": mongoose.Types.ObjectId(doc._id)})) { //jeśli doc istnieje a ty posiadasz już jego id
+            //     //TODO: To to samo zapytanie jest! Zedytu to niżej by działało!
+            //     doc = await findDocumentForMechanic_create(doc._id, req.body.userId)
+            //     console.log(doc)
+            //     res.status(200).json({message: "Client found", data: doc[0]})
+            // }
+            if (await updateDocList(doc, req.body.userId)) { // w przeciwnym wypadku updatuj swoja liste dokumentow
+                doc = await findDocumentForMechanic_create(doc._id);
+                console.log(doc)
                 res.status(200).json({message: "updated list", data: doc[0]})
             }
             else {
@@ -97,7 +104,7 @@ module.exports.read = async (req, res, next) => {
     console.log("body", req.params) //works
     let ids;
     let docs;
-    let user
+    let user;
     /**
      * header: application/json
      *    {
@@ -105,9 +112,9 @@ module.exports.read = async (req, res, next) => {
         }
 
      */
-    if (user = await User.findOne({_id: req.params.ids})) {
+    if (user = await User.findOne({_id: mongoose.Types.ObjectId(req.params.ids)})) {
         ids = user.documents
-    }
+    };
 
     //const ids = JSON.parse(req.params.ids);
     if (req.params.ids) { //fetch docs mechanic got
@@ -145,11 +152,23 @@ module.exports.read = async (req, res, next) => {
 
 
 const updateDocList = async (doc, userId) => {
-    const status = await User.findOneAndUpdate({_id: userId}, {$push: {documents: doc._id}});
-    if (status) {
+    const user = await User.findOneAndUpdate({_id: userId}, {$addToSet: {documents: doc._id}});
+    const client = await User.findOne({permission: false, documents: doc._id});
+    await User.findOneAndUpdate({_id: userId}, {$addToSet: {clients: client._id}});
+    // updateUserData(user, doc);
+    if (user) {
         return 1
     }
     return 0
+};
+
+const updateUserData = async (user, doc) => {
+    if(!user.userData && !user.permission) {
+        user.userData = doc.vehicleOwner;
+        await user.save()
+        // const u = await User.findOne("uuuuus",user);
+        // console.log(u)
+    }
 };
 
 const findDocumentsForMechanic_read = async (ids, userId) => {
@@ -161,7 +180,8 @@ const findDocumentsForMechanic_read = async (ids, userId) => {
             $group: {
                 _id: "$_id",
                 base64: {$first: "$base64"},
-                personalities: {$first: "$personalities"},
+                vehicleOwner: {$first: "$vehicleOwner"},
+                documentOwner: {$first: "$documentOwner"},
                 vehicle: {$first: "$vehicle"},
                 repairsHistory: {$push: "$vehicle.repairsHistory"},
             }
@@ -169,7 +189,8 @@ const findDocumentsForMechanic_read = async (ids, userId) => {
         {
             $project: {
                 base64: 1,
-                personalities: 1,
+                vehicleOwner: 1,
+                documentOwner: 1,
                 vehicle: {$mergeObjects: ["$vehicle", {"repairsHistory": "$repairsHistory"}]},
             }
         },
@@ -205,7 +226,8 @@ const findDocumentForMechanic_create = async (docId, userId = false) => {
             $group: {
                 _id: "$_id",
                 base64: {$first: "$base64"},
-                personalities: {$first: "$personalities"},
+                vehicleOwner: {$first: "$vehicleOwner"},
+                documentOwner: {$first: "$documentOwner"},
                 vehicle: {$first: "$vehicle"},
                 repairsHistory: {$push: "$vehicle.repairsHistory"},
             }
@@ -213,7 +235,8 @@ const findDocumentForMechanic_create = async (docId, userId = false) => {
         {
             $project: {
                 base64: 1,
-                personalities: 1,
+                vehicleOwner: 1,
+                documentOwner: 1,
                 vehicle: {$mergeObjects: ["$vehicle", {"repairsHistory": "$repairsHistory"}]}
             }
         }
@@ -232,7 +255,8 @@ const findDocumentForMechanic_create = async (docId, userId = false) => {
             $group: {
                 _id: "$_id",
                 base64: {$first: "$base64"},
-                personalities: {$first: "$personalities"},
+                vehicleOwner: {$first: "$vehicleOwner"},
+                documentOwner: {$first: "$documentOwner"},
                 vehicle: {$first: "$vehicle"},
                 repairsHistory: {$push: "$vehicle.repairsHistory"},
             }
@@ -240,7 +264,8 @@ const findDocumentForMechanic_create = async (docId, userId = false) => {
         {
             $project: {
                 base64: 1,
-                personalities: 1,
+                vehicleOwner: 1,
+                documentOwner: 1,
                 vehicle: {$mergeObjects: ["$vehicle", {"repairsHistory": "$repairsHistory"}]}
             }
         }

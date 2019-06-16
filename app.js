@@ -14,7 +14,7 @@ const documentsRouter = require('./routes/document.routes');
 const clientsRouter = require('./routes/clients.routes');
 const vehiclesRouter = require('./routes/vehicles.routes');
 const repairListsRouter = require('./routes/repairLists');
-const repairRouter = require('./routes/repairs');
+// const repairRouter = require('./routes/repairs');
 const app = express();
 
 
@@ -70,7 +70,7 @@ app.use('/documents', documentsRouter);
 
 app.use('/clients', clientsRouter);
 app.use('/vehicles', vehiclesRouter);
-app.use('/repair', repairRouter);
+// app.use('/repair', repairRouter);
 app.use('/repairLists', repairListsRouter);
 
 // catch 404 and forward to error handler

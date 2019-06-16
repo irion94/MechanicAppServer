@@ -13,15 +13,25 @@ module.exports.create = async function(req, res, next){
         const userData = new User({
             email: req.body.email,
             password: req.body.password,
-            permission: req.body.permission
+            permission: req.body.permission,
+            userData: {
+                companyName: req.body.companyName,
+                nip: req.body.nip,
+                regon: req.body.regon,
+                name: req.body.name,
+                surname: req.body.surname,
+                phone: req.body.phone,
+                email:req.body.email
+            }
         });
 
-        // console.log(userData)
+        userData.save()
+            .then(() => {
 
-        if (await userData.save()) {
-            res.status(201).json(userData)
-        }
-        res.status(401)
+                res.status(201).json({message: "Created! Please login to continue.", data: {}})
+            })
+            .catch((error) => res.json({message: `Not created:${error.message}`}))
+
     }
     else {
         let err = new Error('All fields required.');
@@ -29,27 +39,23 @@ module.exports.create = async function(req, res, next){
         return next(err);
     }
 };
+module.exports.update = async (req, res) => {
+
+};
 
 module.exports.login = function (req, res, next) {
-    console.log(req.query.email, req.query.password);
     if (req.query.email && req.query.password) {
         User.authenticate(req.query.email, req.query.password, function (error, user) {
-            console.log("login", req.query)
             if (error || !user) {
-                let err = new Error('Wrong email or password.');
-                err.status = 401;
-                return next(err);
+                return res.status(401).json({message: 'Password not match or user not defined'});
             } else {
                 req.session.userId = user._id;
-                // console.log("session start", req.session)
-                return res.json(user);
+                return res.status(200).json(user);
             }
         });
     }
     else {
-        let err = new Error('Login or password not set!');
-        err.status = 400;
-        return next(err)
+        return res.status(400).json({message: 'Login or password not set!'})
     }
 };
 
