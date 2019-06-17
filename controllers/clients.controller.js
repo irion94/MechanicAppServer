@@ -43,18 +43,30 @@ const R = require('ramda')
 // };
 //
 // // findOne({_id: args.clientId, 'vehicleList.repairsHistory.finished': true}, {_id:1,'vehicleList.$': 1})
-// //Find ONE REST Full
-module.exports.readOne = async (req, res, next) => {
-    console.log('trolololo', req.params)
-    const doc = await User.findOne({documents: req.params.id, permission: false})
-        .select('userData')
-        .exec();
-    console.log("_------", doc)
-    if (!doc) {
-        res.status(404).json({message: "doc not exist"})
-    }
 
-    res.status(200).json({message: 'success', data: doc})
+// //Find ONE by contains doc REST Full
+module.exports.readOne = async (req, res, next) => {
+
+    if(req.query.docId){
+        console.log('doc ID')
+        const doc = await User.findOne({documents: req.query.docId, permission: false})
+            .select('userData')
+            .exec();
+        if (!doc) {
+            res.status(404).json({message: "doc not exist"})
+        }
+        res.status(200).json({message: 'success', data: doc})
+    }
+    else if(req.query.userId){
+        console.log('user ID')
+        const doc = await User.findOne({_id: req.query.userId})
+            .select('userData')
+            .exec();
+        if (!doc) {
+            res.status(404).json({message: "doc not exist"})
+        }
+        res.status(200).json({message: 'success', data: doc})
+    }
 };
 //
 // //FindAll

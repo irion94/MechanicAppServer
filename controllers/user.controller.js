@@ -43,7 +43,7 @@ module.exports.update = async (req, res) => {
 
 };
 
-module.exports.login = function (req, res, next) {
+module.exports.login = function (req, res) {
     if (req.query.email && req.query.password) {
         User.authenticate(req.query.email, req.query.password, function (error, user) {
             if (error || !user) {

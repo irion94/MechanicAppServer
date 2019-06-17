@@ -30,6 +30,7 @@ UserSchema.statics.authenticate = (email, password, callback) => {
     UserModel.findOne({email: email})
         .exec(function (err, user) {
             if (err) {
+                console.log("jestem tutjaj error")
                 return callback(err)
             } else if (!user) {
                 let err = new Error('User not found.');
@@ -39,8 +40,10 @@ UserSchema.statics.authenticate = (email, password, callback) => {
             }
             bcrypt.compare(password, user.password, function (err, result) {
                 if (result === true) {
+                    console.log("jestem tutjaj compare true")
                     return callback(null, user);
                 } else {
+                    console.log("jestem tutjaj compare false")
                     return callback();
                 }
             })
@@ -49,7 +52,6 @@ UserSchema.statics.authenticate = (email, password, callback) => {
 
 UserSchema.pre('save', function (next) {
     let user = this;
-    console.log('user',user);
     bcrypt.hash(user.password, 10, function (err, hash) {
         if (err) {
             return next(err);

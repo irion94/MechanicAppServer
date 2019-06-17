@@ -15,7 +15,7 @@ const Client = require('../models/document.model');
 
 
 //Read Clients
-router.get('/one/:id', getUser); //find one REST
+router.get('/one', getUser); //find one REST
 // router.get('/all/:userId', getUsers); //find all //UserID
 // router.post('/', createClient);
 //
